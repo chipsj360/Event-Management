@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -74,9 +75,13 @@ WSGI_APPLICATION = 'main_proj.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+   'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'event_db',       # Your MySQL database name
+        'USER': 'root',              # Your MySQL username
+        'PASSWORD': 'password',  # Your MySQL password
+        'HOST': 'localhost',         # Database host, e.g., '127.0.0.1' or 'localhost'
+        'PORT': '3306',              # MySQL default port
     }
 }
 
