@@ -13,18 +13,112 @@
             border-radius: 10px;
             text-align: center;
         }
+        .carousel-item img {
+            height: 500px;
+            object-fit: cover;
+        }
+        .overlay-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .overlay-text h5 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .overlay-text p {
+            font-size: 1.5rem;
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="#">Event Manager</a>
+    <nav class="navbar navbar-expand-lg fixed-top navbar-light shadow mb-4" style="background-color: #8490A3;" aria-label="Main navigation">
+        <div class="container-fluid">
+            <div class="navbar-brand">
+                <a href="/">
+                    <img src="/static/images/logo.jpeg" alt="" class="logo" style="height: 40px;">
+                </a>
+            </div>
+            <button class="navbar-toggler align-content-ri p-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon custom-toggler"> </span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <!-- <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/products">Products</a>
+                    </li> -->
+                    <!-- <li class="nav-item">
+                        <button type="submit" class="btn btn-secondary btn-block contactUsBtn">Contact Us</button>
+                    </li> -->
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa fa-user-circle-o me-2"></i>{{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end w-220px" aria-labelledby="profileDropdown">
+                                <li><a href="/admin" class="dropdown-item">Dashboard</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a href="/login" class="nav-link active">Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
-    
+
+    <div id="eventCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="../static/images/event-1.jpg" class="d-block w-100" alt="Event 1">
+                <div class="carousel-caption overlay-text">
+                    <h5>Welcome to Event Manager</h5>
+                    <p>Discover amazing events happening near you.</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="../static/images/event-2.jpg" class="d-block w-100" alt="Event 2">
+                <div class="carousel-caption overlay-text">
+                    <h5>Join the Excitement</h5>
+                    <p>Book venues and attend fantastic gatherings.</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="../static/images/event-3.jpg" class="d-block w-100" alt="Event 3">
+                <div class="carousel-caption overlay-text">
+                    <h5>Plan Your Events</h5>
+                    <p>Create, manage, and promote your events easily.</p>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
     <div class="container mt-5">
-        <h2 class="text-center mb-4">Upcoming Events</h2>
-        
+        <h2 class="text-center mb-4 py-5">Upcoming Events</h2>
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="stats-card">
@@ -45,7 +139,6 @@
                 </div>
             </div>
         </div>
-        
         <div class="row">
             {% for event in events %}
             <div class="col-md-4 mb-4">
@@ -65,7 +158,6 @@
             {% endfor %}
         </div>
     </div>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
