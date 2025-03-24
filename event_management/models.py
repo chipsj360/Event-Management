@@ -5,14 +5,14 @@ from django.core.exceptions import ValidationError
 from django.contrib import admin
 
 class BaseModel(models.Model):
-  created_at = models.DateTimeField(default=now, editable=False)
-  created_by = models.IntegerField(null=True, blank=True)
-  datemodified = models.DateTimeField(auto_now=True)
-  modified_by = models.IntegerField(null=True, blank=True)
-  status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=now, editable=False)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, editable=False, null=True, blank=True)
+    datemodified = models.DateTimeField(auto_now=True)
+    modified_by = models.IntegerField(null=True, blank=True)
+    status = models.BooleanField(default=True)
 
-  class Meta:
-    abstract = True
+    class Meta:
+        abstract = True
 
 # Create your models here.
 class Venue(BaseModel):
@@ -20,11 +20,12 @@ class Venue(BaseModel):
     address = models.TextField()
     capacity = models.IntegerField()
     contact_number = models.CharField(max_length=20)
-    created_at = models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
         return self.name
     
+
 
 class Event(BaseModel):
     APPROVAL_STATUS = [
@@ -37,9 +38,7 @@ class Event(BaseModel):
     description = models.TextField()
     date = models.DateTimeField()
     expected_guests = models.IntegerField()
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     venue = models.ForeignKey(Venue, on_delete=models.SET_NULL, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
     approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS, default='pending')
 
     def clean(self):
@@ -49,14 +48,12 @@ class Event(BaseModel):
         - The expected guests do not exceed the venue's capacity.
         """
         if self.venue:
-            # Check if the expected guests exceed the venue capacity
             if self.expected_guests > self.venue.capacity:
                 raise ValidationError(f"Expected guests ({self.expected_guests}) cannot exceed venue capacity ({self.venue.capacity}).")
 
-            # Check if an event is already approved for this venue on the same date
             conflicting_event = Event.objects.filter(
                 venue=self.venue,
-                date__date=self.date.date(),  # Compare only the date (ignore time)
+                date__date=self.date.date(),
                 approval_status='approved'
             ).exclude(id=self.id).exists()
 
@@ -64,7 +61,9 @@ class Event(BaseModel):
                 raise ValidationError("This venue is already booked for the selected date.")
 
     def save(self, *args, **kwargs):
-        self.clean()  # Validate before saving
+        if not self.pk and 'user' in kwargs:  # Only set created_by on creation
+            self.created_by = kwargs.pop('user')
+        self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -104,6 +103,25 @@ class EventAdmin(admin.ModelAdmin):
     list_filter = ('approval_status', 'date', 'venue')
     actions = ['approve_events', 'reject_events']
 
+    def get_queryset(self, request):
+        """Ensure users only see their own events unless they are superusers."""
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(created_by=request.user)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Prevent users from selecting another user in created_by field."""
+        if db_field.name == "created_by":
+            kwargs["queryset"] = User.objects.filter(id=request.user.id)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        """Set created_by automatically on object creation."""
+        if not obj.pk:
+            obj.created_by = request.user
+        obj.save()
+
     def approve_events(self, request, queryset):
         queryset.update(approval_status='approved')
     approve_events.short_description = "Approve selected events"
@@ -111,5 +129,3 @@ class EventAdmin(admin.ModelAdmin):
     def reject_events(self, request, queryset):
         queryset.update(approval_status='rejected')
     reject_events.short_description = "Reject selected events"
-
-
