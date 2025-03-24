@@ -110,6 +110,12 @@ class EventAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(created_by=request.user)
 
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        """Restrict approval_status choices for non-superusers."""
+        if db_field.name == "approval_status" and not request.user.is_superuser:
+            kwargs["choices"] = [('pending', 'Pending')]  # Restrict to "Pending" only
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """Prevent users from selecting another user in created_by field."""
         if db_field.name == "created_by":
@@ -129,3 +135,4 @@ class EventAdmin(admin.ModelAdmin):
     def reject_events(self, request, queryset):
         queryset.update(approval_status='rejected')
     reject_events.short_description = "Reject selected events"
+
