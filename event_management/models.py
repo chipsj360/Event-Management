@@ -44,10 +44,15 @@ class Event(BaseModel):
 
     def clean(self):
         """
-        Ensure that no other approved event exists for the same venue on the same date.
-        Prevents multiple bookings at the same venue and time.
+        Ensure that:
+        - No other approved event exists for the same venue on the same date.
+        - The expected guests do not exceed the venue's capacity.
         """
         if self.venue:
+            # Check if the expected guests exceed the venue capacity
+            if self.expected_guests > self.venue.capacity:
+                raise ValidationError(f"Expected guests ({self.expected_guests}) cannot exceed venue capacity ({self.venue.capacity}).")
+
             # Check if an event is already approved for this venue on the same date
             conflicting_event = Event.objects.filter(
                 venue=self.venue,
