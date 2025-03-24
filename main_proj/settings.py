@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from django.urls import reverse_lazy
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -105,7 +105,31 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+JAZZMIN_SETTINGS = {
+    "site_title": "Event Management System ",
+    "site_header": "Dashboard",
+    "site_brand": "Admin Portal",
+    "welcome_sign": "Welcome to the Admin Portal",
+    "copyright": "Event Management System ",
+    "user_avatar": None,
+    "custom_links": {
+        "my_app": [
+            {
+                "name": "Custom Link",
+                "url": "/admin/myapp/mymodel/",
+                "icon": "fas fa-link",
+                "permissions": ["myapp.view_mymodel"]
+            },
+        ]
+    },
+      "topmenu_links": [
+        # Home link pointing to Django's index view
+        {"name": "Home", "url": reverse_lazy("index"), "new_window": False},
+    ],
 
+       
+    
+}
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
