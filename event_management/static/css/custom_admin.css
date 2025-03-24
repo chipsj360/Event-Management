@@ -1,0 +1,4 @@
+.selectfilter, .selectfilter select {
+    width: 400px !important; /* Adjust width */
+    height: 500px !important; /* Adjust height */
+}
